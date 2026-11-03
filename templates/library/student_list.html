@@ -1,0 +1,76 @@
+{% extends 'library/base.html' %}
+
+{% block title %}Student Management - LibraryHub{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="dashboard-title">
+        <h2>👥 Student Management</h2>
+        <p>View, update, and manage registered student records.</p>
+    </div>
+    <div>
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary btn-sm">← Dashboard</a>
+    </div>
+</div>
+
+<div class="glass-card">
+    <div class="dashboard-header" style="border-bottom: 1px solid var(--border-glass); padding-bottom: 20px; margin-bottom: 24px;">
+        <h3>Student Directory</h3>
+        
+        <!-- Search bar -->
+        <form method="get" action="{% url 'manage_students' %}" class="search-box-form">
+            <input type="text" name="q" value="{{ query }}" placeholder="Search by student ID, name, or branch...">
+            <button type="submit" class="btn btn-secondary btn-sm">Search</button>
+            {% if query %}
+                <a href="{% url 'manage_students' %}" class="btn btn-secondary btn-sm" style="display: flex; align-items: center; justify-content: center; padding: 0 12px;">Reset</a>
+            {% endif %}
+        </form>
+    </div>
+
+    {% if students %}
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student ID / Roll No</th>
+                        <th>Full Name</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Branch</th>
+                        <th>Active Borrows</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                        <tr>
+                            <td><strong>{{ student.student_id }}</strong></td>
+                            <td>{{ student.user.get_full_name|default:student.user.username }}</td>
+                            <td><span class="badge badge-warning" style="background: rgba(99, 102, 241, 0.15); color: var(--secondary); border-color: rgba(99, 102, 241, 0.3);">{{ student.user.username }}</span></td>
+                            <td>{{ student.user.email }}</td>
+                            <td>{{ student.branch }}</td>
+                            <td>
+                                <span class="badge badge-success">
+                                    {{ student.borrow_records.count }} total
+                                </span>
+                            </td>
+                            <td>
+                                <div class="actions-flex" style="display: flex; gap: 8px;">
+                                    <a href="{% url 'edit_student' student.id %}" class="btn btn-secondary btn-sm">✏️ Edit</a>
+                                    <a href="{% url 'delete_student' student.id %}" class="btn btn-danger btn-sm" style="background: transparent; border-color: var(--danger); color: var(--danger);">🗑️ Delete</a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 40px 0; color: var(--text-secondary);">
+            <p style="font-size: 48px; margin-bottom: 12px;">👥</p>
+            <h4>No students found.</h4>
+            <p style="font-size: 14px; margin-top: 6px;">Students will appear here once they register an account.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

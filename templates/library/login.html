@@ -1,0 +1,44 @@
+{% extends 'library/base.html' %}
+
+{% block title %}Login - LibraryHub{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper glass-card">
+    <h2>Welcome Back</h2>
+    <p class="auth-subtitle">Please enter your credentials to login</p>
+    
+    <form method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+            <div class="alert alert-error" style="padding: 10px; margin-bottom: 20px;">
+                {% for error in form.non_field_errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                    <ul class="error-list">
+                        {% for error in field.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        {% endfor %}
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Login</button>
+        </div>
+    </form>
+    
+    <p class="auth-footer-text">
+        Don't have an account? <a href="{% url 'register' %}">Register here</a>
+    </p>
+</div>
+{% endblock %}

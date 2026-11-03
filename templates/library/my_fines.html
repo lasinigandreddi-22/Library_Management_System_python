@@ -1,0 +1,87 @@
+{% extends 'library/base.html' %}
+
+{% block title %}My Fines - LibraryHub{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="dashboard-title">
+        <h2>💰 My Fines & Penalties</h2>
+        <p>Transparent summary of overdue book fines and payment statuses.</p>
+    </div>
+    <div>
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary btn-sm">← Dashboard</a>
+    </div>
+</div>
+
+<!-- Stats Row -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <span class="stat-label">Total Fines Incurred</span>
+        <span class="stat-value">₹{{ total_fines_amount }}</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-label">Pending Payment</span>
+        <span class="stat-value" style="color: var(--danger);">₹{{ pending_fines_amount }}</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-label">Paid Fines</span>
+        <span class="stat-value" style="color: var(--primary);">₹{{ paid_fines_amount }}</span>
+    </div>
+</div>
+
+<div class="glass-card">
+    <div class="dashboard-header" style="border-bottom: 1px solid var(--border-glass); padding-bottom: 20px; margin-bottom: 24px;">
+        <h3>Fine Breakdown</h3>
+        <span style="font-size: 13px; color: var(--text-secondary);">Standard rate: ₹5 per day late</span>
+    </div>
+
+    {% if fines %}
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Book</th>
+                        <th>Due Date</th>
+                        <th>Return Date</th>
+                        <th>Late Days</th>
+                        <th>Fine Amount</th>
+                        <th>Payment Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for fine in fines %}
+                        <tr>
+                            <td><strong>{{ fine.borrow_record.book.title }}</strong></td>
+                            <td>{{ fine.borrow_record.due_date|default:"-" }}</td>
+                            <td>{{ fine.borrow_record.return_date|default:"-" }}</td>
+                            <td>
+                                <span class="badge" style="background: rgba(245, 158, 11, 0.15); color: var(--warning);">
+                                    {{ fine.late_days }} day{{ fine.late_days|pluralize }}
+                                </span>
+                            </td>
+                            <td><strong style="color: var(--danger); font-size: 16px;">₹{{ fine.amount }}</strong></td>
+                            <td>
+                                {% if fine.status == 'Pending' %}
+                                    <span class="badge badge-danger">
+                                        <span class="stock-dot stock-empty"></span> Pending
+                                    </span>
+                                {% else %}
+                                    <span class="badge badge-success">
+                                        <span class="stock-dot stock-available"></span> Paid on {{ fine.payment_date|default:"Cleared" }}
+                                    </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 40px 0; color: var(--text-secondary);">
+            <p style="font-size: 48px; margin-bottom: 12px;">🎉</p>
+            <h4>No fines recorded!</h4>
+            <p style="font-size: 14px; margin-top: 6px;">You have no overdue penalties. Keep returning books on time to keep your record clean.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

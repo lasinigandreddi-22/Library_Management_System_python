@@ -1,0 +1,128 @@
+{% extends 'library/base.html' %}
+
+{% block title %}Fine Management - LibraryHub{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="dashboard-title">
+        <h2>💰 Fine Management</h2>
+        <p>Audit overdue penalties, track receivables, and clear payment records.</p>
+    </div>
+    <div>
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary btn-sm">← Dashboard</a>
+    </div>
+</div>
+
+<!-- Stats Row -->
+<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+    <div class="stat-card">
+        <span class="stat-label">Total Fine Records</span>
+        <span class="stat-value">{{ total_fines_count }}</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-label">Pending Invoices</span>
+        <span class="stat-value" style="color: var(--warning);">{{ total_pending_count }}</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-label">Total Outstanding</span>
+        <span class="stat-value" style="color: var(--danger);">₹{{ total_pending_amount }}</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-label">Total Collected</span>
+        <span class="stat-value" style="color: var(--primary);">₹{{ total_paid_amount }}</span>
+    </div>
+</div>
+
+<div class="glass-card">
+    <div class="dashboard-header" style="border-bottom: 1px solid var(--border-glass); padding-bottom: 20px; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <span style="font-size: 14px; color: var(--text-secondary); margin-right: 6px;">Filter Status:</span>
+            <a href="{% url 'manage_fines' %}" class="btn btn-sm {% if not status_filter %}btn-primary{% else %}btn-secondary{% endif %}">All</a>
+            <a href="{% url 'manage_fines' %}?status=Pending" class="btn btn-sm {% if status_filter == 'Pending' %}btn-primary{% else %}btn-secondary{% endif %}">Pending Only</a>
+            <a href="{% url 'manage_fines' %}?status=Paid" class="btn btn-sm {% if status_filter == 'Paid' %}btn-primary{% else %}btn-secondary{% endif %}">Paid Only</a>
+        </div>
+        
+        <!-- Search bar -->
+        <form method="get" action="{% url 'manage_fines' %}" class="search-box-form">
+            {% if status_filter %}
+                <input type="hidden" name="status" value="{{ status_filter }}">
+            {% endif %}
+            <input type="text" name="q" value="{{ query }}" placeholder="Search by student ID or book...">
+            <button type="submit" class="btn btn-secondary btn-sm">Search</button>
+            {% if query %}
+                <a href="{% url 'manage_fines' %}{% if status_filter %}?status={{ status_filter }}{% endif %}" class="btn btn-secondary btn-sm" style="display: flex; align-items: center; justify-content: center; padding: 0 12px;">Reset</a>
+            {% endif %}
+        </form>
+    </div>
+
+    {% if fines %}
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Book</th>
+                        <th>Due Date</th>
+                        <th>Return Date</th>
+                        <th>Late Days</th>
+                        <th>Fine Amount</th>
+                        <th>Status</th>
+                        <th>Payment Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for fine in fines %}
+                        <tr>
+                            <td>
+                                <strong>{{ fine.student.user.get_full_name|default:fine.student.user.username }}</strong>
+                                <br>
+                                <span style="font-size: 12px; color: var(--text-secondary);">ID: {{ fine.student.student_id }}</span>
+                            </td>
+                            <td>{{ fine.borrow_record.book.title }}</td>
+                            <td>{{ fine.borrow_record.due_date|default:"-" }}</td>
+                            <td>{{ fine.borrow_record.return_date|default:"-" }}</td>
+                            <td>
+                                <span class="badge" style="background: rgba(245, 158, 11, 0.15); color: var(--warning);">
+                                    {{ fine.late_days }}d
+                                </span>
+                            </td>
+                            <td><strong style="color: var(--danger); font-size: 15px;">₹{{ fine.amount }}</strong></td>
+                            <td>
+                                {% if fine.status == 'Pending' %}
+                                    <span class="badge badge-danger">
+                                        <span class="stock-dot stock-empty"></span> Pending
+                                    </span>
+                                {% else %}
+                                    <span class="badge badge-success">
+                                        <span class="stock-dot stock-available"></span> Paid
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>{{ fine.payment_date|default:"-" }}</td>
+                            <td>
+                                {% if fine.status == 'Pending' %}
+                                    <form action="{% url 'pay_fine_admin' fine.id %}" method="post" style="display: inline;" onsubmit="return confirm('Confirm clearing ₹{{ fine.amount }} fine for {{ fine.student.student_id }}?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-secondary btn-sm" style="border-color: var(--primary); color: var(--primary); background: transparent;">
+                                            ✓ Mark Paid
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <span style="color: var(--text-muted); font-size: 13px;">Cleared</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 40px 0; color: var(--text-secondary);">
+            <p style="font-size: 48px; margin-bottom: 12px;">💰</p>
+            <h4>No fine records match your filter.</h4>
+            <p style="font-size: 14px; margin-top: 6px;">Overdue returns will generate fine notices automatically here.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

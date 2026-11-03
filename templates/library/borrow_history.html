@@ -1,0 +1,82 @@
+{% extends 'library/base.html' %}
+
+{% block title %}Borrowing Activity - LibraryHub{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="dashboard-title">
+        <h2>Borrowing & Returns Activity</h2>
+        {% if is_admin_user %}
+            <p>System-wide transactional audits of all library items.</p>
+        {% else %}
+            <p>Your history of borrowed and returned books.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="glass-card">
+    {% if history %}
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Book Title</th>
+                        {% if is_admin_user %}
+                            <th>Student Name (ID)</th>
+                            <th>Branch</th>
+                        {% endif %}
+                        <th>Issue Date</th>
+                        <th>Due Date</th>
+                        <th>Return Date</th>
+                        <th>Status</th>
+                        {% if not is_admin_user %}
+                            <th>Action</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in history %}
+                        <tr>
+                            <td><strong>{{ record.book.title }}</strong></td>
+                            {% if is_admin_user %}
+                                <td>{{ record.student.user.get_full_name|default:record.student.user.username }} ({{ record.student.student_id }})</td>
+                                <td>{{ record.student.branch }}</td>
+                            {% endif %}
+                            <td>{{ record.issue_date }}</td>
+                            <td>{{ record.due_date|default:"-" }}</td>
+                            <td>{{ record.return_date|default:"-" }}</td>
+                            <td>
+                                {% if record.status == 'Borrowed' %}
+                                    <span class="badge badge-warning">Borrowed</span>
+                                {% else %}
+                                    <span class="badge badge-success">Returned</span>
+                                {% endif %}
+                            </td>
+                            {% if not is_admin_user %}
+                                <td>
+                                    {% if record.status == 'Borrowed' %}
+                                        <form action="{% url 'return_book' record.id %}" method="post" style="display: inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-secondary btn-sm" style="border-color: var(--secondary); color: var(--secondary); background: transparent;">Return Book</button>
+                                        </form>
+                                    {% else %}
+                                        <span style="color: var(--text-muted); font-size: 13px;">No action required</span>
+                                    {% endif %}
+                                </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 40px 0; color: var(--text-secondary);">
+            <p style="font-size: 48px; margin-bottom: 12px;">📊</p>
+            <h4>No activity logs available.</h4>
+            {% if not is_admin_user %}
+                <p style="font-size: 14px; margin-top: 6px;">You haven't borrowed any books yet. Visit your dashboard to borrow your first book.</p>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

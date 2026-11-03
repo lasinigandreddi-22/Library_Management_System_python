@@ -1,0 +1,57 @@
+{% extends 'library/base.html' %}
+
+{% block title %}Register Student - LibraryHub{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper glass-card" style="max-width: 550px;">
+    <h2>Student Registration</h2>
+    <p class="auth-subtitle">Create a student account to search and borrow books</p>
+    
+    <form method="post" action="{% url 'register' %}">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+            <div class="alert alert-error" style="padding: 10px; margin-bottom: 20px;">
+                {% for error in form.non_field_errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                    <ul class="error-list">
+                        {% for error in field.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        {% endfor %}
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Create Student Account</button>
+        </div>
+    </form>
+    
+    <p class="auth-footer-text">
+        Already have an account? <a href="{% url 'login' %}">Login here</a>
+    </p>
+</div>
+{% block css_override %}
+<style>
+    /* Styling select elements to make them consistent */
+    select {
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 16px center;
+        background-size: 16px;
+        padding-right: 40px !important;
+    }
+</style>
+{% endblock %}
+{% endblock %}

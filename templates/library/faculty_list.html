@@ -1,0 +1,74 @@
+{% extends 'library/base.html' %}
+
+{% block title %}Faculty Management - LibraryHub{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="dashboard-title">
+        <h2>🎓 Faculty Management</h2>
+        <p>Register, view, update, and manage faculty member profiles.</p>
+    </div>
+    <div style="display: flex; gap: 8px;">
+        <a href="{% url 'add_faculty' %}" class="btn btn-primary btn-sm">➕ Add Faculty</a>
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary btn-sm">← Dashboard</a>
+    </div>
+</div>
+
+<div class="glass-card">
+    <div class="dashboard-header" style="border-bottom: 1px solid var(--border-glass); padding-bottom: 20px; margin-bottom: 24px;">
+        <h3>Faculty Directory</h3>
+        
+        <!-- Search bar -->
+        <form method="get" action="{% url 'manage_faculty' %}" class="search-box-form">
+            <input type="text" name="q" value="{{ query }}" placeholder="Search by faculty ID, name, or department...">
+            <button type="submit" class="btn btn-secondary btn-sm">Search</button>
+            {% if query %}
+                <a href="{% url 'manage_faculty' %}" class="btn btn-secondary btn-sm" style="display: flex; align-items: center; justify-content: center; padding: 0 12px;">Reset</a>
+            {% endif %}
+        </form>
+    </div>
+
+    {% if faculty_list %}
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Faculty ID</th>
+                        <th>Name</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Department</th>
+                        <th>Phone</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for faculty in faculty_list %}
+                        <tr>
+                            <td><strong>{{ faculty.faculty_id }}</strong></td>
+                            <td>{{ faculty.user.get_full_name|default:faculty.user.username }}</td>
+                            <td><span class="badge badge-warning" style="background: rgba(99, 102, 241, 0.15); color: var(--secondary); border-color: rgba(99, 102, 241, 0.3);">{{ faculty.user.username }}</span></td>
+                            <td>{{ faculty.user.email }}</td>
+                            <td>{{ faculty.department }}</td>
+                            <td>{{ faculty.phone|default:"-" }}</td>
+                            <td>
+                                <div class="actions-flex" style="display: flex; gap: 8px;">
+                                    <a href="{% url 'edit_faculty' faculty.id %}" class="btn btn-secondary btn-sm">✏️ Edit</a>
+                                    <a href="{% url 'delete_faculty' faculty.id %}" class="btn btn-danger btn-sm" style="background: transparent; border-color: var(--danger); color: var(--danger);">🗑️ Delete</a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 40px 0; color: var(--text-secondary);">
+            <p style="font-size: 48px; margin-bottom: 12px;">🎓</p>
+            <h4>No faculty members found.</h4>
+            <p style="font-size: 14px; margin-top: 6px; margin-bottom: 20px;">Register faculty profiles to grant library access and directory tracking.</p>
+            <a href="{% url 'add_faculty' %}" class="btn btn-primary">Add First Faculty Member</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

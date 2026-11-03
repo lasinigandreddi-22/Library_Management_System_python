@@ -1,0 +1,2 @@
+# Ensure shell scripts always use LF line endings on Linux/Render
+*.sh text eol=lf

@@ -1,0 +1,69 @@
+{% extends 'library/base.html' %}
+
+{% block title %}Book Reading Cabin - LibraryHub{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="dashboard-title">
+        <h2>🪑 Book Reading Cabin Slot</h2>
+        <p>Select a date and available time slot to reserve your quiet study space.</p>
+    </div>
+    <div style="display: flex; gap: 8px;">
+        <a href="{% url 'my_reading_room_bookings' %}" class="btn btn-secondary btn-sm">
+            📋 My Cabin Bookings
+        </a>
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary btn-sm">
+            ← Dashboard
+        </a>
+    </div>
+</div>
+
+<div class="auth-wrapper glass-card" style="max-width: 550px; margin: 20px auto;">
+    <h3 style="margin-bottom: 6px;">Reservation Details</h3>
+    <p class="auth-subtitle" style="margin-bottom: 24px; color: var(--text-secondary);">Cabin slots are available daily from 9:00 AM to 5:00 PM.</p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label for="booking_date" style="display: block; font-weight: 500; margin-bottom: 8px; color: var(--text-secondary);">
+                📅 Select Date
+            </label>
+            <input
+                type="date"
+                id="booking_date"
+                name="booking_date"
+                min="{{ today }}"
+                required
+                style="width: 100%; padding: 12px 16px; border-radius: var(--radius-sm); background: rgba(17, 24, 39, 0.8); border: 1px solid var(--border-glass); color: var(--text-primary); font-family: inherit; font-size: 15px;"
+            >
+        </div>
+
+        <div class="form-group" style="margin-bottom: 25px;">
+            <label for="time_slot" style="display: block; font-weight: 500; margin-bottom: 8px; color: var(--text-secondary);">
+                ⏰ Select Time Slot
+            </label>
+            <select
+                id="time_slot"
+                name="time_slot"
+                required
+                style="width: 100%; padding: 12px 16px; border-radius: var(--radius-sm); background: #111827; border: 1px solid var(--border-glass); color: var(--text-primary); font-family: inherit; font-size: 15px;"
+            >
+                <option value="" disabled selected>-- Choose an available time slot --</option>
+                {% for value, label in time_slots %}
+                    <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-actions" style="display: flex; gap: 12px; margin-top: 30px;">
+            <button type="submit" class="btn btn-primary" style="flex: 2;">
+                ✅ Confirm Cabin Booking
+            </button>
+            <a href="{% url 'dashboard' %}" class="btn btn-secondary" style="flex: 1; text-align: center;">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends 'library/base.html' %}
+
+{% block title %}Delete Book - LibraryHub{% endblock %}
+
+{% block content %}
+<div class="confirm-card glass-card">
+    <div style="font-size: 56px; color: var(--danger); margin-bottom: 20px;">⚠️</div>
+    <h2>Confirm Deletion</h2>
+    <p>Are you sure you want to delete the book <strong>"{{ book.title }}"</strong> by {{ book.author }}? This action is permanent and cannot be undone.</p>
+    
+    <form method="post" action="{% url 'delete_book' book.id %}">
+        {% csrf_token %}
+        <div class="confirm-actions">
+            <button type="submit" class="btn btn-danger">Confirm Delete</button>
+            <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

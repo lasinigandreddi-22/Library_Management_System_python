@@ -1,0 +1,110 @@
+{% extends 'library/base.html' %}
+
+{% block title %}Admin Dashboard - LibraryHub{% endblock %}
+
+{% block content %}
+<!-- Welcome Section -->
+<div class="dashboard-header">
+    <div class="dashboard-title">
+        <h2>Administrator Workspace</h2>
+        <p>Manage books catalog, users (students & faculty), fines, and library operations.</p>
+    </div>
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <a href="{% url 'add_book' %}" class="btn btn-primary btn-sm">➕ Add Book</a>
+        <a href="{% url 'manage_students' %}" class="btn btn-secondary btn-sm">👥 Students</a>
+        <a href="{% url 'manage_faculty' %}" class="btn btn-secondary btn-sm">🎓 Faculty</a>
+        <a href="{% url 'manage_fines' %}" class="btn btn-secondary btn-sm">💰 Fines</a>
+    </div>
+</div>
+
+<!-- Stats Row -->
+<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+    <div class="stat-card">
+        <span class="stat-label">Total Unique Titles</span>
+        <span class="stat-value">{{ total_titles }}</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-label">Active Borrows</span>
+        <span class="stat-value" style="color: var(--secondary);">{{ active_borrows }}</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-label">Registered Students</span>
+        <span class="stat-value" style="color: var(--primary);">{{ total_students }}</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-label">Faculty Members</span>
+        <span class="stat-value" style="color: var(--warning);">{{ total_faculty }}</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-label">Pending Fines</span>
+        <span class="stat-value" style="color: var(--danger);">₹{{ pending_fines_amount }}</span>
+    </div>
+</div>
+
+<!-- Filter and Catalog Section -->
+<div class="glass-card">
+    <div class="dashboard-header" style="border-bottom: 1px solid var(--border-glass); padding-bottom: 20px; margin-bottom: 24px;">
+        <h3>Book Catalog</h3>
+        
+        <!-- Search bar -->
+        <form method="get" action="{% url 'dashboard' %}" class="search-box-form">
+            <input type="text" name="q" value="{{ query }}" placeholder="Search by title, author, or category...">
+            <button type="submit" class="btn btn-secondary btn-sm">Search</button>
+            {% if query %}
+                <a href="{% url 'dashboard' %}" class="btn btn-secondary btn-sm" style="display: flex; align-items: center; justify-content: center; padding: 0 12px;">Reset</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Table content -->
+    {% if books %}
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>Category</th>
+                        <th>Stock Qty</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for book in books %}
+                        <tr>
+                            <td><strong>{{ book.title }}</strong></td>
+                            <td>{{ book.author }}</td>
+                            <td><span class="badge badge-warning" style="background: rgba(99, 102, 241, 0.15); color: var(--secondary); border-color: rgba(99, 102, 241, 0.3);">{{ book.category }}</span></td>
+                            <td>{{ book.quantity }}</td>
+                            <td>
+                                {% if book.quantity > 0 %}
+                                    <span class="badge badge-success">
+                                        <span class="stock-dot stock-available"></span> Available
+                                    </span>
+                                {% else %}
+                                    <span class="badge badge-danger">
+                                        <span class="stock-dot stock-empty"></span> Out of Stock
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="actions-flex">
+                                    <a href="{% url 'edit_book' book.id %}" class="btn btn-secondary btn-sm">✏️ Edit</a>
+                                    <a href="{% url 'delete_book' book.id %}" class="btn btn-danger btn-sm" style="background: transparent; border-color: var(--danger); color: var(--danger);">🗑️ Delete</a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 40px 0; color: var(--text-secondary);">
+            <p style="font-size: 48px; margin-bottom: 12px;">🔍</p>
+            <h4>No books found in catalog.</h4>
+            <p style="font-size: 14px; margin-top: 6px;">Try adjusting your keywords or click "Add New Book" to build your inventory.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

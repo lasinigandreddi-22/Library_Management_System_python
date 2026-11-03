@@ -1,0 +1,101 @@
+{% extends 'library/base.html' %}
+
+{% block title %}My Cabin Bookings - LibraryHub{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="dashboard-title">
+        <h2>📋 {% if is_admin_user %}All Reading Cabin Bookings{% else %}My Reading Cabin Bookings{% endif %}</h2>
+        <p>{% if is_admin_user %}System-wide reservations for library reading cabins.{% else %}Track and manage your reading cabin slot reservations.{% endif %}</p>
+    </div>
+    <div style="display: flex; gap: 8px;">
+        {% if not is_admin_user %}
+            <a href="{% url 'reading_room_booking' %}" class="btn btn-primary btn-sm">
+                🪑 Book New Slot
+            </a>
+        {% endif %}
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary btn-sm">
+            ← Dashboard
+        </a>
+    </div>
+</div>
+
+<div class="glass-card">
+    {% if bookings %}
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        {% if is_admin_user %}
+                            <th>Student Name (ID)</th>
+                            <th>Branch</th>
+                        {% endif %}
+                        <th>Booking Date</th>
+                        <th>Time Slot</th>
+                        <th>Status</th>
+                        <th>Booked On</th>
+                        {% if not is_admin_user %}
+                            <th>Action</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in bookings %}
+                        <tr>
+                            {% if is_admin_user %}
+                                <td>{{ booking.student.user.get_full_name|default:booking.student.user.username }} ({{ booking.student.student_id }})</td>
+                                <td>{{ booking.student.branch }}</td>
+                            {% endif %}
+                            <td><strong>{{ booking.booking_date }}</strong></td>
+                            <td>
+                                <span class="badge" style="background: rgba(99, 102, 241, 0.15); color: var(--secondary); border-color: rgba(99, 102, 241, 0.3);">
+                                    ⏰ {{ booking.time_slot }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if booking.status == 'Booked' %}
+                                    <span class="badge badge-success">
+                                        <span class="stock-dot stock-available"></span> Booked
+                                    </span>
+                                {% elif booking.status == 'Cancelled' %}
+                                    <span class="badge badge-danger">
+                                        <span class="stock-dot stock-empty"></span> Cancelled
+                                    </span>
+                                {% else %}
+                                    <span class="badge badge-warning">{{ booking.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ booking.created_at|date:"M d, Y H:i" }}</td>
+                            {% if not is_admin_user %}
+                                <td>
+                                    {% if booking.status == 'Booked' %}
+                                        <form action="{% url 'cancel_reading_room_booking' booking.id %}" method="post" style="display: inline;" onsubmit="return confirm('Are you sure you want to cancel this cabin slot booking?');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-secondary btn-sm" style="border-color: var(--danger); color: var(--danger); background: transparent;">
+                                                Cancel Booking
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <span style="color: var(--text-muted); font-size: 13px;">No action required</span>
+                                    {% endif %}
+                                </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 40px 0; color: var(--text-secondary);">
+            <p style="font-size: 48px; margin-bottom: 12px;">🪑</p>
+            <h4>No cabin bookings found.</h4>
+            {% if not is_admin_user %}
+                <p style="font-size: 14px; margin-top: 6px; margin-bottom: 20px;">You haven't reserved any reading cabin slots yet.</p>
+                <a href="{% url 'reading_room_booking' %}" class="btn btn-primary">
+                    Book Reading Cabin Now
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

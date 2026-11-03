@@ -1,0 +1,93 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Library Management System{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <header>
+        <div class="container navbar">
+            <a href="{% url 'home' %}" class="logo">
+                <span>📚</span> LibraryHub
+            </a>
+            <ul class="nav-links">
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">Dashboard</a></li>
+                    
+                    {% if user.is_staff %}
+                        <li><a href="{% url 'manage_students' %}" class="{% if 'manage_student' in request.resolver_match.url_name or 'edit_student' in request.resolver_match.url_name %}active{% endif %}">Students</a></li>
+                        <li><a href="{% url 'manage_faculty' %}" class="{% if 'faculty' in request.resolver_match.url_name %}active{% endif %}">Faculty</a></li>
+                        <li><a href="{% url 'manage_fines' %}" class="{% if 'fines' in request.resolver_match.url_name %}active{% endif %}">Fines</a></li>
+                        <li><a href="{% url 'borrow_history' %}" class="{% if request.resolver_match.url_name == 'borrow_history' %}active{% endif %}">History</a></li>
+                        <li class="user-badge">Admin: <strong>{{ user.username }}</strong></li>
+                    {% elif user.faculty_profile %}
+                        <li class="user-badge">Faculty: <strong>{{ user.username }}</strong></li>
+                    {% else %}
+                        <li><a href="{% url 'borrow_history' %}" class="{% if request.resolver_match.url_name == 'borrow_history' %}active{% endif %}">History</a></li>
+                        <li><a href="{% url 'my_fines' %}" class="{% if request.resolver_match.url_name == 'my_fines' %}active{% endif %}">My Fines</a></li>
+                        <li class="user-badge">Student: <strong>{{ user.username }}</strong></li>
+                    {% endif %}
+                    
+                    <li>
+                        <form action="{% url 'logout' %}" method="post" style="display: inline;" id="logout-form">
+                            {% csrf_token %}
+                            <a href="#" onclick="document.getElementById('logout-form').submit();" class="btn btn-secondary btn-sm" style="margin-left: 10px;">Logout</a>
+                        </form>
+                    </li>
+                {% else %}
+                    <li><a href="{% url 'login' %}" class="{% if request.resolver_match.url_name == 'login' %}active{% endif %}">Login</a></li>
+                    <li><a href="{% url 'register' %}" class="btn btn-primary btn-sm">Register</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Messages Section -->
+        {% if messages %}
+            <div class="messages-container">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}" id="alert-{{ forloop.counter }}">
+                        <span>{{ message }}</span>
+                        <button class="close-alert" onclick="closeAlert('alert-{{ forloop.counter }}')">&times;</button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 Library Management System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        function closeAlert(id) {
+            const alertElement = document.getElementById(id);
+            if (alertElement) {
+                alertElement.style.opacity = '0';
+                setTimeout(() => {
+                    alertElement.remove();
+                }, 300);
+            }
+        }
+        
+        // Auto-close alerts after 5 seconds
+        document.addEventListener('DOMContentLoaded', () => {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach((alert) => {
+                setTimeout(() => {
+                    closeAlert(alert.id);
+                }, 5000);
+            });
+        });
+    </script>
+</body>
+</html>
