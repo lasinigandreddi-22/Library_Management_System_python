@@ -1,23 +1,13 @@
-databases:
-  - name: libraryhub-db
-    databaseName: libraryhub
-    user: libraryuser
-    plan: free
-    region: oregon
-
 services:
   - type: web
     name: libraryhub
     runtime: python
     plan: free
-    region: oregon
     buildCommand: "./build.sh"
     startCommand: "gunicorn library_system.wsgi:application"
     envVars:
       - key: DATABASE_URL
-        fromDatabase:
-          name: libraryhub-db
-          property: connectionString
+        sync: false
       - key: SECRET_KEY
         generateValue: true
       - key: DEBUG
